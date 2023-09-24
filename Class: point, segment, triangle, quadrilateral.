@@ -1,0 +1,228 @@
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+class Sector:
+    def __init__(self, start_point, end_point):
+        self.start_point = start_point
+        self.end_point = end_point
+        s = length_sector(start_point, end_point)
+        print(f'Длина отрезка равна: {s:.4f}')
+
+
+def length_sector(start_point, end_point):
+    x1 = start_point.x
+    y1 = start_point.y
+    x2 = end_point.x
+    y2 = end_point.y
+    length = abs(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
+    return length
+
+
+class Triangle:
+    def __init__(self, vertex1, vertex2, vertex3):
+        self.vertex1 = vertex1
+        self.vertex2 = vertex2
+        self.vertex3 = vertex3
+        print()
+        across1 = product_of_vectors(vertex1, vertex2)
+        across2 = product_of_vectors(vertex2, vertex3)
+        across3 = product_of_vectors(vertex3, vertex1)
+        if (across1 and across2 and across3) == 0:
+            print(f'Треугольник из заданных точек(отрезков) существовать НЕ может,'
+                  f'т.е. три точки(отрезка) лежат на одной прямой!')
+        else:
+            print(f'Треугольник из заданных точек(отрезков) может существовать!')
+            intersection1 = point_intersection_segment(vertex1, vertex2)
+            intersection2 = point_intersection_segment(vertex2, vertex3)
+            intersection3 = point_intersection_segment(vertex3, vertex1)
+            if intersection1 and intersection2 and intersection3:
+                z = perimetr_triangle(vertex1, vertex2, vertex3)
+                print(f'Периметр треугольника равен: {z:.4f}')
+                s = area_triangle(vertex1, vertex2, vertex3)
+                print(f'Площадь треугольника равна: {s:.4f}')
+                m = medians_triangle(vertex1, vertex2, vertex3)
+                print(f'Медиана1 равна: {m[0]:.4f}, Медиана2 равна: {m[1]:.4f}, Медиана3 равна: {m[2]:.4f}')
+                corner_triangle = defining_size_corner_triangle(vertex1, vertex2, vertex3)
+                if corner_triangle[0] > corner_triangle[1]:
+                    print(f"Треугольник имеет тупой угол напротив большей стороны")
+                if corner_triangle[0] == corner_triangle[1]:
+                    print(f"Треугольник имеет прямой угол напротив большей стороны")
+                if corner_triangle[0] < corner_triangle[1]:
+                    print(f"Треугольник имеет все острые уголы")
+
+
+def perimetr_triangle(vertex1, vertex2, vertex3):
+    p_tri = length_sector(vertex1.start_point, vertex2.start_point) + \
+         length_sector(vertex2.start_point, vertex3.start_point) + \
+         length_sector(vertex3.start_point, vertex1.start_point)
+    return p_tri
+
+
+def area_triangle(vertex1, vertex2, vertex3):
+    p = perimetr_triangle(vertex1, vertex2, vertex3) / 2
+    s_triangle = p * (p - length_sector(vertex1.start_point, vertex2.start_point)) * \
+        (p - length_sector(vertex2.start_point, vertex3.start_point)) * \
+        (p - length_sector(vertex3.start_point, vertex1.start_point))
+    return s_triangle
+
+
+def medians_triangle(vertex1, vertex2, vertex3):
+    d1 = length_sector(vertex1.start_point, vertex1.end_point)
+    d2 = length_sector(vertex2.start_point, vertex2.end_point)
+    d3 = length_sector(vertex3.start_point, vertex3.end_point)
+    median1 = 0.5 * (2 * (d3 ** 2 + d1 ** 2) - d2) ** 0.5
+    median2 = 0.5 * (2 * (d1 ** 2 + d2 ** 2) - d3) ** 0.5
+    median3 = 0.5 * (2 * (d2 ** 2 + d3 ** 2) - d1) ** 0.5
+    return median1, median2, median3
+
+
+def defining_size_corner_triangle(vertex1, vertex2, vertex3):
+    d1 = length_sector(vertex1.start_point, vertex1.end_point)
+    d2 = length_sector(vertex2.start_point, vertex2.end_point)
+    d3 = length_sector(vertex3.start_point, vertex3.end_point)
+    edge_triangle = [d1, d2, d3]
+    edge_triangle_sort = sorted(edge_triangle)
+    edge_triangle_max = (max(edge_triangle_sort)) ** 2
+    edge_triangle_max = float(f"{edge_triangle_max:.4f}")
+    del edge_triangle_sort[2]
+    edge_triangle_sort_square = []
+    for num in edge_triangle_sort:
+        edge_triangle_sort_square.append(num ** 2)
+    sum_edge_middle_min_square = sum(edge_triangle_sort_square)
+    sum_edge_middle_min_square = float(f"{sum_edge_middle_min_square:.4f}")
+    return edge_triangle_max, sum_edge_middle_min_square
+
+
+class Quadrangle:
+    def __init__(self, edge1, edge2, edge3, edge4):
+        self.edge1 = edge1
+        self.edge2 = edge2
+        self.edge3 = edge3
+        self.edge4 = edge4
+        print()
+        across_1 = product_of_vectors(edge1, edge2)
+        across_2 = product_of_vectors(edge2, edge3)
+        across_3 = product_of_vectors(edge3, edge4)
+        across_4 = product_of_vectors(edge4, edge1)
+        if (across_1 and across_2 and across_3 and across_4) == 0:
+            print(f'Четырёхугольник из заданных точек(отрезков) существовать НЕ может,'
+                  f'т.е. три/четыре точки(отрезка) лежат на одной прямой!')
+        else:
+            print(f'Четырёхугольник из заданных точек(отрезков) может существовать!')
+            if (across_1 * across_2 * across_3 * across_4) >= 0:
+                print(f'Четырёхугольник из заданных точек(отрезков) является выпуклым!')
+            intersection_1 = point_intersection_segment(edge1, edge2)
+            intersection_2 = point_intersection_segment(edge2, edge3)
+            intersection_3 = point_intersection_segment(edge3, edge4)
+            intersection_4 = point_intersection_segment(edge4, edge1)
+            if intersection_1 and intersection_2 and intersection_3 and intersection_4:
+                zz = perimetr_quadrangle(edge1, edge2, edge3, edge4)
+                print(f'Периметр четырехугольника равен: {zz:.4f}')
+                ss = area_quadrangle(edge1, edge2, edge3, edge4)
+                print(f'Площадь четырехугольника равна: {ss:.4f}')
+
+
+def perimetr_quadrangle(edge1, edge2, edge3, edge4):
+    p_quad = length_sector(edge1.start_point, edge2.start_point) + \
+            length_sector(edge2.start_point, edge3.start_point) + \
+            length_sector(edge3.start_point, edge4.start_point) + \
+            length_sector(edge4.start_point, edge1.start_point)
+    return p_quad
+
+
+def area_quadrangle(edge1, edge2, edge3, edge4):
+    s_triangle1 = area_triangle(edge1, edge2, sector6)
+    s_triangle2 = area_triangle(sector1, edge3, edge4)
+    s_quadrangle = s_triangle1 + s_triangle2
+    return s_quadrangle
+
+
+def product_of_vectors(segment1, segment2):
+    x1 = segment1.start_point.x
+    y1 = segment1.start_point.y
+    x2 = segment1.end_point.x
+    y2 = segment1.end_point.y
+    x3 = segment2.start_point.x
+    y3 = segment2.start_point.y
+    x4 = segment2.end_point.x
+    y4 = segment2.end_point.y
+    component_x_1 = x2 - x1
+    component_y_1 = y2 - y1
+    component_x_2 = x4 - x3
+    component_y_2 = y4 - y3
+    det = component_x_1 * component_y_2 - component_y_1 * component_x_2
+    return det
+
+
+def point_intersection_segment(segment1, segment2):
+    x1 = segment1.start_point.x
+    y1 = segment1.start_point.y
+    x2 = segment1.end_point.x
+    y2 = segment1.end_point.y
+    x3 = segment2.start_point.x
+    y3 = segment2.start_point.y
+    x4 = segment2.end_point.x
+    y4 = segment2.end_point.y
+
+    def point_across_section(point_axes_x, point_axes_y):
+        if min(x1, x2) <= point_axes_x <= max(x1, x2):
+            print(f'Точка пересечения отрезков есть, координаты: x = {point_axes_x:.2f}, y = {point_axes_y:.2f}')
+        else:
+            print('Точки пересечения отрезков нет.')
+
+    a1 = y1 - y2
+    b1 = x2 - x1
+    c1 = x1 * y2 - x2 * y1
+    a2 = y3 - y4
+    b2 = x4 - x3
+    c2 = x3 * y4 - x4 * y3
+
+    if b1 * a2 - b2 * a1 and a1:
+        axes_y = (c2 * a1 - c1 * a2) / (b1 * a2 - b2 * a1)
+        axes_x = (-c1 - b1 * axes_y) / a1
+        point_across_section(axes_x, axes_y)
+    elif b1 * a2 - b2 * a1 and a2:
+        axes_y = (c2 * a1 - c1 * a2) / (b1 * a2 - b2 * a1)
+        axes_x = (-c2 - b2 * axes_y) / a2
+        point_across_section(axes_x, axes_y)
+    else:
+        print('Точки пересечения отрезков нет, отрезки либо ||, либо лежат на одной прямой, \n'
+              'но не имеют общих точек!')
+
+    if x1 > x2:
+        x1, x2 = x2, x1
+    if y1 > y2:
+        y1, y2 = y2, y1
+    if x3 > x4:
+        x3, x4 = x4, x3
+    if y3 > y4:
+        y3, y4 = y4, y3
+
+    if max(x1, x3) <= min(x2, x4) and max(y1, y3) <= min(y2, y4):
+        print(f'(Проекции отрезков по осям X и Y пересекаются)')
+    else:
+        print(f'(Отрезки проекциями по осям X и(или) Y НЕ пересекаются)')
+
+    return x1, x2, x3, x4
+
+
+a = Point(2, 2)
+b = Point(7, 3)
+c = Point(4, 1)
+d = Point(5, 6)
+
+sector1 = Sector(a, b)
+sector2 = Sector(b, c)
+sector3 = Sector(c, a)
+
+sector4 = Sector(a, d)
+sector5 = Sector(d, b)
+sector6 = Sector(b, a)
+
+triangle1 = Triangle(sector1, sector2, sector3)
+#  triangle2 = Triangle(sector4, sector5, sector6)
+
+quadrangle = Quadrangle(sector4, sector5, sector2, sector3)

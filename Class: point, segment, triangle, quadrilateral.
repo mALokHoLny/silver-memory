@@ -107,7 +107,7 @@ class Quadrangle:
         across_2 = product_of_vectors(edge2, edge3)
         across_3 = product_of_vectors(edge3, edge4)
         across_4 = product_of_vectors(edge4, edge1)
-        if (across_1 and across_2 and across_3 and across_4) == 0:
+        if (((across_1 and across_2) or (across_2 and across_3) or (across_3 and across_4) or (across_4 and across_1)) == 0):
             print(f'Четырёхугольник из заданных точек(отрезков) существовать НЕ может,'
                   f'т.е. три/четыре точки(отрезка) лежат на одной прямой!')
         else:
